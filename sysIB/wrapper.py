@@ -2,8 +2,9 @@ from swigibpy import EWrapper
 import time
 from swigibpy import EPosixClientSocket
 
-### how many seconds before we give up
-MAX_WAIT=30
+# how many seconds before we give up
+MAX_WAIT = 30
+
 
 def return_IB_connection_info():
     """
@@ -11,12 +12,13 @@ def return_IB_connection_info():
 
     """
 
-    host=""
+    host = ""
 
-    port=4001
-    clientid=999
+    port = 4001
+    clientid = 999
 
     return (host, port, clientid)
+
 
 class IBWrapper(EWrapper):
     """
@@ -43,61 +45,64 @@ class IBWrapper(EWrapper):
 
         """
 
-        ## Any errors not on this list we just treat as information
-        ERRORS_TO_TRIGGER=[201, 103, 502, 504, 509, 200, 162, 420, 2105, 1100, 478, 201, 399]
+        # Any errors not on this list we just treat as information
+        ERRORS_TO_TRIGGER = [201, 103, 502, 504, 509,
+                             200, 162, 420, 2105, 1100, 478, 201, 399]
 
         if errorCode in ERRORS_TO_TRIGGER:
-            errormsg="IB error id %d errorcode %d string %s" %(id, errorCode, errorString)
+            errormsg = "IB error id %d errorcode %d string %s" % (
+                id, errorCode, errorString)
             print(errormsg)
             setattr(self, "flag_iserror", True)
             setattr(self, "error_msg", True)
 
-        ## Wrapper functions don't have to return anything
-
+        # Wrapper functions don't have to return anything
 
     def currentTime(self, time_from_server):
 
         setattr(self, "data_the_time_now_is", time_from_server)
 
-    ### stuff we don't use
+    # stuff we don't use
     def nextValidId(self, orderId):
         pass
 
     def managedAccounts(self, openOrderEnd):
         pass
 
+
 class IBclient(object):
+
     def __init__(self, callback):
         tws = EPosixClientSocket(callback)
-        (host, port, clientid)=return_IB_connection_info()
+        (host, port, clientid) = return_IB_connection_info()
         tws.eConnect(host, port, clientid)
 
-        self.tws=tws
-        self.cb=callback
+        self.tws = tws
+        self.cb = callback
 
     def speaking_clock(self):
         print("Getting the time... ")
 
         self.tws.reqCurrentTime()
 
-        start_time=time.time()
+        start_time = time.time()
 
         self.cb.init_error()
 
-        iserror=False
+        iserror = False
 
         while not iserror:
             isfinished = hasattr(self.cb, 'data_the_time_now_is')
             if isfinished:
                 break
 
-            iserror=self.cb.flag_iserror
+            iserror = self.cb.flag_iserror
 
             if (time.time() - start_time) > MAX_WAIT:
-                not_finished=False
+                not_finished = False
 
             if iserror:
-                not_finished=False
+                not_finished = False
 
         if iserror:
             print("Error happened")

@@ -16,28 +16,27 @@ def date_as_string(dtobject=datetime.datetime.now()):
 class tsdata(object):
     '''
     Very basic table for ts data
-    
-    Does not do checking eg for multiple records etc    
+
+    Does not do checking eg for multiple records etc
     '''
 
-
     def __init__(self, dbname):
-        
-        self.connection=connection(dbname)
-    
+
+        self.connection = connection(dbname)
+
     def add(self, code, pandasts):
         for datetime in pandasts.index:
-            price=pandasts[datetime]
+            price = pandasts[datetime]
             self.addrow(code, datetime, price)
-    
-    def addrow(self, code, datetime, price):
-        self.connection.write("INSERT INTO timeseries VALUES (?, ?, ?)", (date_as_string(datetime), code, float(price)))
-    
-    def read(self, code):
-        ans=self.connection.read("SELECT datetime, price FROM timeseries WHERE code=?", (code,))
-        dindex=[pd.to_datetime(x[0]) for x in ans]
-        prices=[float(x[1]) for x in ans]
-        ans=pd.TimeSeries(prices, index=dindex)
-        return ans
-    
 
+    def addrow(self, code, datetime, price):
+        self.connection.write("INSERT INTO timeseries VALUES (?, ?, ?)",
+                              (date_as_string(datetime), code, float(price)))
+
+    def read(self, code):
+        ans = self.connection.read(
+            "SELECT datetime, price FROM timeseries WHERE code=?", (code,))
+        dindex = [pd.to_datetime(x[0]) for x in ans]
+        prices = [float(x[1]) for x in ans]
+        ans = pd.TimeSeries(prices, index=dindex)
+        return ans
