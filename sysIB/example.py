@@ -9,4 +9,4 @@ if __name__=="__main__":
 
     callback = IBWrapper()
     client=IBclient(callback)
-    print client.speaking_clock() 
+    print(client.speaking_clock()) 

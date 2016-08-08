@@ -28,7 +28,7 @@ assert st_table.read("FTSE") is None
 
 dt_table=tsdata(dbname)
 
-somprices=pd.TimeSeries(range(100), pd.date_range('1/1/2014', periods=100))
+somprices=pd.TimeSeries(list(range(100)), pd.date_range('1/1/2014', periods=100))
 
 dt_table.add("FTSE", somprices)
 
@@ -37,4 +37,4 @@ assert dt_table.read("FTSE").values[-1]==99.0
 ## Remove the file so example is clean next time
 os.remove(dbfilename)
 
-print "No problems"
+print("No problems")

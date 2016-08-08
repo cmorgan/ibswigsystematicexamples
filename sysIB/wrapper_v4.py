@@ -52,7 +52,7 @@ class IBWrapper(EWrapper):
        
         if errorCode in ERRORS_TO_TRIGGER:
             errormsg="IB error id %d errorcode %d string %s" %(id, errorCode, errorString)
-            print errormsg
+            print(errormsg)
             setattr(self, "flag_iserror", True)
             setattr(self, "error_msg", True)
            
@@ -88,7 +88,7 @@ class IBWrapper(EWrapper):
         else:
             filldata=self.data_fill_data
 
-        if reqId not in filldata.keys():
+        if reqId not in list(filldata.keys()):
             filldata[reqId]={}
             
         execid=execdetails['orderid']
@@ -306,8 +306,8 @@ class IBclient(object):
     
         contract_details=self.cb.data_contractdetails[reqId]
         if iserror or contract_details=={}:
-            print self.cb.error_msg
-            print "Problem getting details"
+            print(self.cb.error_msg)
+            print("Problem getting details")
             return None
     
         return contract_details
@@ -342,8 +342,8 @@ class IBclient(object):
 
         
         if brokerorderid is None or iserror:
-            print self.cb.error_msg
-            print "Problem getting next broker orderid"
+            print(self.cb.error_msg)
+            print("Problem getting next broker orderid")
             return None
         
         return brokerorderid
@@ -367,10 +367,10 @@ class IBclient(object):
 
         ## We can eithier supply our own ID or ask IB to give us the next valid one
         if orderid is None:
-            print "Getting orderid from IB"
+            print("Getting orderid from IB")
             orderid=self.get_next_brokerorderid()
             
-        print "Using order id of %d" % orderid
+        print("Using order id of %d" % orderid)
     
          # Place the order
         self.tws.placeOrder(
@@ -412,8 +412,8 @@ class IBclient(object):
         
         order_structure=self.cb.data_order_structure
         if iserror:
-            print self.cb.error_msg
-            print "Problem getting open orders"
+            print(self.cb.error_msg)
+            print("Problem getting open orders")
     
         return order_structure    
     
@@ -447,8 +447,8 @@ class IBclient(object):
             pass
     
         if iserror:
-            print self.cb.error_msg
-            print "Problem getting executions"
+            print(self.cb.error_msg)
+            print("Problem getting executions")
         
         execlist=self.cb.data_fill_data[reqId]
         

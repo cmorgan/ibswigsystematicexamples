@@ -13,17 +13,21 @@ EMPTY_HDATA=autodf("date", "open", "high", "low", "close", "volume")
 ### how many seconds before we give up
 MAX_WAIT=30
 
+TWS_PORT = 7496
+GATE_PORT = 4001
+PORT = GATE_PORT
+
 def return_IB_connection_info():
     """
     Returns the tuple host, port, clientID required by eConnect
-   
+
     """
-   
+
     host=""
-   
-    port=4001
+
+    port=PORT
     clientid=999
-   
+
     return (host, port, clientid)
 
 class IBWrapper(EWrapper):
@@ -42,7 +46,7 @@ class IBWrapper(EWrapper):
     def error(self, id, errorCode, errorString):
         """
         error handling, simple for now
-       
+
         Here are some typical IB errors
         INFO: 2107, 2106
         WARNING 326 - can't connect as already connected
@@ -54,21 +58,21 @@ class IBWrapper(EWrapper):
 
         ## Any errors not on this list we just treat as information
         ERRORS_TO_TRIGGER=[201, 103, 502, 504, 509, 200, 162, 420, 2105, 1100, 478, 201, 399]
-       
+
         if errorCode in ERRORS_TO_TRIGGER:
             errormsg="IB error id %d errorcode %d string %s" %(id, errorCode, errorString)
-            print errormsg
+            print(errormsg)
             setattr(self, "flag_iserror", True)
             setattr(self, "error_msg", True)
-           
+
         ## Wrapper functions don't have to return anything
-       
+
 
     ## The following are not used
-       
+
     def nextValidId(self, orderId):
         pass
-   
+
     def managedAccounts(self, openOrderEnd):
         pass
 
@@ -77,7 +81,7 @@ class IBWrapper(EWrapper):
             histdict=dict()
         else:
             histdict=self.data_historicdata
-        
+
         histdict[tickerid]=EMPTY_HDATA
         setattr(self, "data_historicdata", histdict)
         setattr(self, "flag_historicdata_finished", False)
@@ -85,7 +89,7 @@ class IBWrapper(EWrapper):
     def historicalData(self, reqId, date, openprice, high,
                        low, close, volume,
                        barCount, WAP, hasGaps):
-        
+
 
         if date[:8] == 'finished':
             setattr(self, "flag_historicdata_finished", True)
@@ -104,21 +108,21 @@ class IBclient(object):
         self.tws=tws
         self.cb=callback
 
-    
+
     def get_IB_historical_data(self, ibcontract, durationStr="1 Y", barSizeSetting="1 day", tickerid=MEANINGLESS_NUMBER):
-        
+
         """
         Returns historical prices for a contract, up to today
-        
+
         tws is a result of calling IBConnector()
-        
+
         """
 
         today=datetime.datetime.now()
 
         self.cb.init_error()
         self.cb.init_historicprices(tickerid)
-            
+
         # Request some historical data.
         self.tws.reqHistoricalData(
                 tickerid,                                          # tickerId,
@@ -128,26 +132,28 @@ class IBclient(object):
                 barSizeSetting,                                    # barSizeSetting,
                 "TRADES",                                   # whatToShow,
                 1,                                          # useRTH,
-                1                                           # formatDate
+                1,                                          # formatDate
+            None
             )
-        
+
         start_time=time.time()
         finished=False
         iserror=False
-        
+
         while not finished and not iserror:
             finished=self.cb.flag_historicdata_finished
             iserror=self.cb.flag_iserror
-            
+
             if (time.time() - start_time) > MAX_WAIT:
                 iserror=True
             pass
-            
+
         if iserror:
-            print self.cb.error_msg
+            print((self.cb.error_msg))
+
             raise Exception("Problem getting historic data")
-        
+
         historicdata=self.cb.data_historicdata[tickerid]
         results=historicdata.to_pandas("date")
-        
+
         return results

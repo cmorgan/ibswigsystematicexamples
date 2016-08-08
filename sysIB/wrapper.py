@@ -48,7 +48,7 @@ class IBWrapper(EWrapper):
 
         if errorCode in ERRORS_TO_TRIGGER:
             errormsg="IB error id %d errorcode %d string %s" %(id, errorCode, errorString)
-            print errormsg
+            print(errormsg)
             setattr(self, "flag_iserror", True)
             setattr(self, "error_msg", True)
 
@@ -76,7 +76,7 @@ class IBclient(object):
         self.cb=callback
 
     def speaking_clock(self):
-        print "Getting the time... "
+        print("Getting the time... ")
 
         self.tws.reqCurrentTime()
 
@@ -100,8 +100,7 @@ class IBclient(object):
                 not_finished=False
 
         if iserror:
-            print "Error happened"
-            print self.cb.error_msg
+            print("Error happened")
+            print((self.cb.error_msg))
 
         return self.cb.data_the_time_now_is
-

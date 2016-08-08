@@ -50,7 +50,7 @@ class IBWrapper(EWrapper):
        
         if errorCode in ERRORS_TO_TRIGGER:
             errormsg="IB error id %d errorcode %d string %s" %(id, errorCode, errorString)
-            print errormsg
+            print(errormsg)
             setattr(self, "flag_iserror", True)
             setattr(self, "error_msg", True)
            
@@ -228,8 +228,8 @@ class IBclient(object):
     
         contract_details=self.cb.data_contractdetails[reqId]
         if iserror or contract_details=={}:
-            print self.cb.error_msg
-            print "Problem getting details"
+            print(self.cb.error_msg)
+            print("Problem getting details")
             return None
     
         return contract_details
@@ -255,7 +255,7 @@ class IBclient(object):
 
             if (time.time() - start_time) > MAX_WAIT_SECONDS:
                 finished=True
-                print "Didn't get an end for account update, might be missing stuff"
+                print("Didn't get an end for account update, might be missing stuff")
             pass
 
         ## Turn off the streaming
@@ -268,8 +268,8 @@ class IBclient(object):
         
         
         if iserror:
-            print self.cb.error_msg
-            print "Problem getting details"
+            print(self.cb.error_msg)
+            print("Problem getting details")
             return None
 
         return (account_value, portfolio_data)

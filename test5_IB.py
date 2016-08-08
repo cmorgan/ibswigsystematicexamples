@@ -30,14 +30,14 @@ if __name__=="__main__":
     ## In particular we want the expiry. You cannot just use cdetails['expiry'][:6] to map back to the yyyymm 
     ##    expiry since certain contracts expire the month before they should!
     
-    print "Expiry is %s" % cdetails['expiry']
+    print("Expiry is %s" % cdetails['expiry'])
 
     ## Once you have the portfolio positions then you can use these expiries to map back
 
     (account_value, portfolio_data)=client.get_IB_account_data()
 
-    print "Portfolio"
-    print portfolio_data
+    print("Portfolio")
+    print(portfolio_data)
     
-    print "\n account info"
-    print account_value
+    print("\n account info")
+    print(account_value)

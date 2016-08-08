@@ -23,4 +23,4 @@ def setup_blank_tables(dbfilename, setupcodelist):
     ## Set permissions
     os.chmod(dbfilename, stat.S_IRWXU | stat.S_IRGRP | stat.S_IROTH)
 
-    print "created %s " % dbfilename
+    print("created %s " % dbfilename)

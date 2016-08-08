@@ -24,7 +24,7 @@ class autodf(object):
         
     def add_row(self, **kwargs):
         
-        for keyname in self.storage.keys():
+        for keyname in list(self.storage.keys()):
             if keyname in kwargs:
                 self.storage[keyname].append(kwargs[keyname])
             else:
@@ -57,8 +57,8 @@ def action_ib_fill(execlist):
     The price of each fill then is the average price for the order so far 
     """
     
-    print "recived fill as follows:"
-    print ""
-    print execlist
-    print ""
+    print("recived fill as follows:")
+    print("")
+    print(execlist)
+    print("")
         

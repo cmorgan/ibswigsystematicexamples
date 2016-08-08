@@ -17,6 +17,6 @@ if __name__=="__main__":
     ibcontract.exchange="GLOBEX"
 
     ans=client.get_IB_market_data(ibcontract)
-    print "Bid size, Ask size; Bid price; Ask price"
-    print ans
+    print("Bid size, Ask size; Bid price; Ask price")
+    print(ans)
     
