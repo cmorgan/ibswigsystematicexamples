@@ -8,10 +8,12 @@ from sysIB.IButils import autodf
 
 MEANINGLESS_NUMBER = 999
 
-EMPTY_HDATA = autodf("date", "open", "high", "low", "close", "volume")
+# collect all available data from IB
+EMPTY_HDATA = autodf('date', 'open', 'high', 'low', 'close', 'volume',
+                     'barCount', 'wap', 'hasGaps')
 
 # how many seconds before we give up
-MAX_WAIT = 30
+MAX_WAIT = 10
 
 TWS_PORT = 7496
 GATEWAY_PORT = 4001
@@ -21,7 +23,6 @@ PORT = GATEWAY_PORT
 def return_IB_connection_info():
     """
     Returns the tuple host, port, clientID required by eConnect
-
     """
 
     host = ""
@@ -35,8 +36,8 @@ def return_IB_connection_info():
 class IBWrapper(EWrapper):
 
     """
-        Callback object passed to TWS, these functions will be called directly
-    by TWS.
+    Callback object passed to TWS, these functions will be called directly by
+    TWS.
     """
 
     def init_error(self):
@@ -70,7 +71,6 @@ class IBWrapper(EWrapper):
         # Wrapper functions don't have to return anything
 
     # The following are not used
-
     def nextValidId(self, orderId):
         pass
 
@@ -95,24 +95,38 @@ class IBWrapper(EWrapper):
             setattr(self, "flag_historicdata_finished", True)
         else:
             historicdata = self.data_historicdata[reqId]
-            date = datetime.datetime.strptime(date, "%Y%m%d")
-            historicdata.add_row(date=date, open=openprice,
-                                 high=high, low=low, close=close, volume=volume)
+
+            date_fmt = '%Y%m%d'
+            if len(date) > 8:
+                date_fmt = '%Y%m%d %H:%M:%S'
+            date = datetime.datetime.strptime(date, date_fmt)
+            historicdata.add_row(date=date,
+                                 open=openprice,
+                                 high=high,
+                                 low=low,
+                                 close=close,
+                                 volume=volume,
+                                 barCount=barCount,
+                                 WAP=WAP,
+                                 hasGaps=hasGaps)
 
 
 class IBclient(object):
 
     def __init__(self, callback):
         tws = EPosixClientSocket(callback)
-        (host, port, clientid) = return_IB_connection_info()
+        host, port, clientid = return_IB_connection_info()
         tws.eConnect(host, port, clientid)
 
         self.tws = tws
         self.cb = callback
 
-    def get_IB_historical_data(self, ibcontract, durationStr="1 Y",
+    def get_IB_historical_data(self,
+                               ibcontract,
+                               durationStr="1 Y",
                                barSizeSetting="1 day",
-                               tickerid=MEANINGLESS_NUMBER):
+                               tickerid=MEANINGLESS_NUMBER,
+                               end_dt=None):
         """
         Returns historical prices for a contract, up to today
 
@@ -120,21 +134,24 @@ class IBclient(object):
 
         """
 
-        today = datetime.datetime.now()
+        if end_dt is None:
+            today = datetime.datetime.now()
 
         self.cb.init_error()
         self.cb.init_historicprices(tickerid)
+        end_dt_str = end_dt.strftime("%Y%m%d %H:%M:%S %Z")
+        end_dt_str += ' GMT'
 
         # Request some historical data.
         self.tws.reqHistoricalData(
-            tickerid,                                          # tickerId,
-            ibcontract,                                   # contract,
-            today.strftime("%Y%m%d %H:%M:%S %Z"),       # endDateTime,
-            durationStr,                                      # durationStr,
-            barSizeSetting,                                    # barSizeSetting,
-            "TRADES",                                   # whatToShow,
-            1,                                          # useRTH,
-            1,                                          # formatDate
+            tickerid,  # tickerId,
+            ibcontract,  # contract,
+            end_dt_str,  # endDateTime,
+            durationStr,  # durationStr,
+            barSizeSetting,  # barSizeSetting,
+            "TRADES",  # whatToShow,
+            1,  # useRTH,
+            1,  # formatDate
             None  # chartOptions
         )
 
@@ -148,14 +165,11 @@ class IBclient(object):
 
             if (time.time() - start_time) > MAX_WAIT:
                 iserror = True
-            pass
 
         if iserror:
             print((self.cb.error_msg))
-
             raise Exception("Problem getting historic data")
 
         historicdata = self.cb.data_historicdata[tickerid]
         results = historicdata.to_pandas("date")
-
         return results

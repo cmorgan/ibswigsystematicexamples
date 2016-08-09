@@ -1,8 +1,9 @@
 from sysIB.wrapper_v2 import IBWrapper, IBclient
 from swigibpy import Contract as IBcontract
+import datetime
 
-if __name__ == "__main__":
 
+def main():
     """
     This simple example returns historical data
     """
@@ -12,9 +13,19 @@ if __name__ == "__main__":
 
     ibcontract = IBcontract()
     ibcontract.secType = "FUT"
-    ibcontract.expiry = "201809"
+    ibcontract.expiry = "202009"
     ibcontract.symbol = "GE"
     ibcontract.exchange = "GLOBEX"
 
-    ans = client.get_IB_historical_data(ibcontract)
-    print(ans)
+    end_dt = datetime.datetime(2016, 8, 3)
+    ans = client.get_IB_historical_data(ibcontract,
+                                        durationStr='5 d',
+                                        barSizeSetting='5 mins',
+                                        end_dt=end_dt)
+    return ans
+
+
+if __name__ == "__main__":
+    data = main()
+    import pdb; pdb.set_trace()  # BREAKPOINT
+    print(data)
