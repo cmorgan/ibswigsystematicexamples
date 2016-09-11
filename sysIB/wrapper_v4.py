@@ -15,22 +15,17 @@ FILL_CODE = -1
 def return_IB_connection_info():
     """
     Returns the tuple host, port, clientID required by eConnect
-
     """
-
     host = ""
-
     port = 4001
     clientid = 999
-
     return (host, port, clientid)
 
 
 class IBWrapper(EWrapper):
     """
-
-    Callback object passed to TWS, these functions will be called directly by the TWS or Gateway.
-
+    Callback object passed to TWS, these functions will be called directly by
+    the TWS or Gateway.
     """
 
     def init_error(self):
@@ -79,7 +74,6 @@ class IBWrapper(EWrapper):
     """
     get stuff
     """
-
     def init_fill_data(self):
         setattr(self, "data_fill_data", {})
         setattr(self, "flag_fill_data_finished", False)
@@ -105,10 +99,11 @@ class IBWrapper(EWrapper):
         a) we have submitted an order and a fill has come back
         b) We have asked for recent fills to be given to us
 
-        We populate the filldata object and also call action_ib_fill in case we need to do something with the
-          fill data
+        We populate the filldata object and also call action_ib_fill in case we
+          need to do something with the fill data
 
-        See API docs, C++, SocketClient Properties, Contract and Execution for more details
+        See API docs, C++, SocketClient Properties, Contract and Execution for
+        more details
         """
         reqId = int(reqId)
 
@@ -125,8 +120,18 @@ class IBWrapper(EWrapper):
         expiry = contract.expiry
         side = execution.side
 
-        execdetails = dict(side=str(side), times=str(exectime), orderid=str(thisorderid), qty=int(cumQty), price=float(avgprice), symbol=str(
-            symbol), expiry=str(expiry), clientid=str(clientid), execid=str(execid), account=str(account), exchange=str(exchange), permid=int(permid))
+        execdetails = dict(side=str(side),
+                           times=str(exectime),
+                           orderid=str(thisorderid),
+                           qty=int(cumQty),
+                           price=float(avgprice),
+                           symbol=str(symbol),
+                           expiry=str(expiry),
+                           clientid=str(clientid),
+                           execid=str(execid),
+                           account=str(account),
+                           exchange=str(exchange),
+                           permid=int(permid))
 
         if reqId == FILL_CODE:
             # This is a fill from a trade we've just done
@@ -162,15 +167,17 @@ class IBWrapper(EWrapper):
         """
         Tells us about any orders we are working now
 
-        Note these objects are not persistent or interesting so we have to extract what we want
-
-
+        Note these objects are not persistent or interesting so we have to
+        extract what we want
         """
 
         # Get a selection of interesting things about the order
-        orderdetails = dict(symbol=contract.symbol, expiry=contract.expiry, qty=int(order.totalQuantity),
-                            side=order.action, orderid=int(orderID), clientid=order.clientId)
-
+        orderdetails = dict(symbol=contract.symbol,
+                            expiry=contract.expiry,
+                            qty=int(order.totalQuantity),
+                            side=order.action,
+                            orderid=int(orderID),
+                            clientid=order.clientId)
         self.add_order_data(orderdetails)
 
     def openOrderEnd(self):
@@ -186,7 +193,8 @@ class IBWrapper(EWrapper):
         """
         Give the next valid order id
 
-        Note this doesn't 'burn' the ID; if you call again without executing the next ID will be the same
+        Note this doesn't 'burn' the ID; if you call again without executing
+        the next ID will be the same
         """
 
         self.data_brokerorderid = orderId
@@ -241,14 +249,14 @@ class IBclient(object):
     """
     Client object
 
-    Used to interface with TWS for outside world, does all handling of streaming waiting etc
+    Used to interface with TWS for outside world, does all handling of
+    streaming waiting etc
 
     Create like this
     callback = IBWrapper()
     client=IBclient(callback)
 
     We then use various methods to get prices etc
-
     """
 
     def __init__(self, callback):
@@ -268,16 +276,14 @@ class IBclient(object):
     def get_contract_details(self, ibcontract, reqId=MEANINGLESS_NUMBER):
         """
         Returns a dictionary of contract_details
-
-
         """
 
         self.cb.init_contractdetails(reqId)
         self.cb.init_error()
 
         self.tws.reqContractDetails(
-            reqId,                                         # reqId,
-            ibcontract,                                   # contract,
+            reqId,  # reqId,
+            ibcontract,  # contract,
         )
 
         finished = False
@@ -370,7 +376,6 @@ class IBclient(object):
         """
         Simple wrapper to tell us if we have any open orders
         """
-
         return len(self.get_open_orders()) > 0
 
     def get_open_orders(self):
@@ -409,13 +414,13 @@ class IBclient(object):
         assert isinstance(reqId, int)
         if reqId == FILL_CODE:
             raise Exception(
-                "Can't call get_executions with a reqId of %d as this is reserved for fills %d" % reqId)
+                "Can't call get_executions with a reqId of %d as this is "
+                "reserved for fills %d" % reqId)
 
         self.cb.init_fill_data()
         self.cb.init_error()
 
         # We can change ExecutionFilter to subset different orders
-
         self.tws.reqExecutions(reqId, ExecutionFilter())
 
         iserror = False

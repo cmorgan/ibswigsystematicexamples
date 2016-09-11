@@ -1,18 +1,23 @@
-from sysIB.wrapper_v4 import IBWrapper, IBclient
+import time
+
 from swigibpy import Contract as IBcontract
 
-import time
+from sysIB.wrapper_v4 import IBWrapper, IBclient
+
 
 if __name__ == "__main__":
 
     """
-    This simple example places an order, checks to see if it is active, and receives fill(s)
+    This simple example places an order, checks to see if it is active, and
+    receives fill(s)
 
-    Note: If you are running this on the 'edemo' account it will probably give you back garbage
+    Note: If you are running this on the 'edemo' account it will probably give
+    you back garbage
 
     Though the mechanics should still work
 
-    This is because you see the orders that everyone demoing the account is trading!!!
+    This is because you see the orders that everyone demoing the account is
+    trading!!!
     """
 
     callback = IBWrapper()
@@ -27,8 +32,9 @@ if __name__ == "__main__":
     # Get contract details
     cdetails = client.get_contract_details(ibcontract)
 
-    # In particular we want the expiry. You cannot just use cdetails['expiry'][:6] to map back to the yyyymm
-    # expiry since certain contracts expire the month before they should!
+    # In particular we want the expiry. You cannot just use
+    # cdetails['expiry'][:6] to map back to the yyyymm expiry since certain
+    # contracts expire the month before they should!
 
     print("Expiry is %s" % cdetails['expiry'])
 

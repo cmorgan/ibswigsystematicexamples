@@ -33,7 +33,7 @@ class IBWrapper(EWrapper):
         setattr(self, "error_msg", "")
 
     def error(self, id, errorCode, errorString):
-        """
+       """
         error handling, simple for now
 
         Here are some typical IB errors

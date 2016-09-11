@@ -2,17 +2,12 @@ from sysIB.wrapper_v5 import IBWrapper, IBclient
 from swigibpy import Contract as IBcontract
 
 import time
+from pprint import pprint
 
 if __name__ == "__main__":
 
     """
-    This simple example places an order, checks to see if it is active, and receives fill(s)
-
-    Note: If you are running this on the 'edemo' account it will probably give you back garbage
-
-    Though the mechanics should still work
-
-    This is because you see the orders that everyone demoing the account is trading!!!
+    Example of getting contract and account details
     """
 
     callback = IBWrapper()
@@ -20,25 +15,57 @@ if __name__ == "__main__":
 
     ibcontract = IBcontract()
     ibcontract.secType = "FUT"
-    ibcontract.expiry = "201509"
     ibcontract.symbol = "GBL"
     ibcontract.exchange = "DTB"
 
     # Get contract details
     cdetails = client.get_contract_details(ibcontract)
 
-    # In particular we want the expiry. You cannot just use cdetails['expiry'][:6] to map back to the yyyymm
-    # expiry since certain contracts expire the month before they should!
+    # In particular we want the expiry. You cannot just use
+    # cdetails['expiry'][:6] to map back to the yyyymm expiry since certain
+    # contracts expire the month before they should!
+    pprint(cdetails)
 
-    print("Expiry is %s" % cdetails['expiry'])
-
-    # Once you have the portfolio positions then you can use these expiries to
-    # map back
-
-    (account_value, portfolio_data) = client.get_IB_account_data()
-
-    print("Portfolio")
-    print(portfolio_data)
-
-    print("\n account info")
-    print(account_value)
+    # will look something like:
+    [{'contractMonth': '201612',
+      'currency': 'EUR',
+      'evMultiplier': 0.0,
+      'evRule': '',
+      'exchange': 'DTB',
+      'expiry': '20161208',
+      'liquidHours': '20160925:CLOSED;20160926:0800-2205',
+      'longName': 'Euro Bund (10 Year Bond)',
+      'minTick': 0.01,
+      'secType': 'FUT',
+      'symbol': 'GBL',
+      'timeZoneId': 'MET',
+      'tradingHours': '20160925:CLOSED;20160926:0800-2205',
+      'underConId': 11284196},
+     {'contractMonth': '201703',
+      'currency': 'EUR',
+      'evMultiplier': 0.0,
+      'evRule': '',
+      'exchange': 'DTB',
+      'expiry': '20170308',
+      'liquidHours': '20160925:CLOSED;20160926:0800-2205',
+      'longName': 'Euro Bund (10 Year Bond)',
+      'minTick': 0.01,
+      'secType': 'FUT',
+      'symbol': 'GBL',
+      'timeZoneId': 'MET',
+      'tradingHours': '20160925:CLOSED;20160926:0800-2205',
+      'underConId': 11284196},
+     {'contractMonth': '201706',
+      'currency': 'EUR',
+      'evMultiplier': 0.0,
+      'evRule': '',
+      'exchange': 'DTB',
+      'expiry': '20170608',
+      'liquidHours': '20160925:CLOSED;20160926:0800-2205',
+      'longName': 'Euro Bund (10 Year Bond)',
+      'minTick': 0.01,
+      'secType': 'FUT',
+      'symbol': 'GBL',
+      'timeZoneId': 'MET',
+      'tradingHours': '20160925:CLOSED;20160926:0800-2205',
+      'underConId': 11284196}]

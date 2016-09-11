@@ -1,10 +1,11 @@
-from swigibpy import EWrapper
 import time
-
 import datetime
+
+from swigibpy import EWrapper
 from swigibpy import EPosixClientSocket
 
 from sysIB.IButils import autodf
+
 
 MEANINGLESS_NUMBER = 999
 
@@ -24,9 +25,7 @@ def return_IB_connection_info():
     """
     Returns the tuple host, port, clientID required by eConnect
     """
-
     host = ""
-
     port = PORT
     clientid = 999
 

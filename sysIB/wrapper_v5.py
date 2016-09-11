@@ -2,9 +2,6 @@ from swigibpy import EWrapper
 import time
 from swigibpy import EPosixClientSocket, ExecutionFilter
 
-from swigibpy import Order as IBOrder
-from sysIB.IButils import bs_resolve, action_ib_fill
-
 MAX_WAIT_SECONDS = 10
 MEANINGLESS_NUMBER = 1830
 
@@ -31,6 +28,7 @@ class IBWrapper(EWrapper):
     """
 
     def init_error(self):
+        print('init')
         setattr(self, "flag_iserror", False)
         setattr(self, "error_msg", "")
 
@@ -82,14 +80,15 @@ class IBWrapper(EWrapper):
     # contract details
 
     def init_contractdetails(self, reqId):
+        print('init_contractdetails')
         if "data_contractdetails" not in dir(self):
             dict_contractdetails = dict()
         else:
             dict_contractdetails = self.data_contractdetails
 
-        dict_contractdetails[reqId] = {}
-        setattr(self, "flag_finished_contractdetails", False)
-        setattr(self, "data_contractdetails", dict_contractdetails)
+        dict_contractdetails[reqId] = []
+        self.flag_finished_contractdetails = False
+        self.data_contractdetails = dict_contractdetails
 
     def contractDetails(self, reqId, contractDetails):
         """
@@ -98,8 +97,9 @@ class IBWrapper(EWrapper):
         If you submit more than one request watch out to match up with reqId
         """
 
-        contract_details = self.data_contractdetails[reqId]
+        container = self.data_contractdetails[reqId]
 
+        contract_details = {}
         contract_details["contractMonth"] = contractDetails.contractMonth
         contract_details["liquidHours"] = contractDetails.liquidHours
         contract_details["longName"] = contractDetails.longName
@@ -119,12 +119,16 @@ class IBWrapper(EWrapper):
         contract_details["secType"] = contract2.secType
         contract_details["currency"] = contract2.currency
 
+        container.append(contract_details)
+        print(contract_details['contractMonth'])
+        #container.append(contract_details['contractMonth'])
+
     def contractDetailsEnd(self, reqId):
         """
         Finished getting contract details
         """
-
-        setattr(self, "flag_finished_contractdetails", True)
+        self.flag_finished_contractdetails = True
+        print('contractDetailsEnd')
 
     # portfolio
 
@@ -196,10 +200,7 @@ class IBclient(object):
     def get_contract_details(self, ibcontract, reqId=MEANINGLESS_NUMBER):
         """
         Returns a dictionary of contract_details
-
-
         """
-
         self.cb.init_contractdetails(reqId)
         self.cb.init_error()
 

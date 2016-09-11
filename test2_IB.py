@@ -12,15 +12,15 @@ def main():
     client = IBclient(callback)
 
     ibcontract = IBcontract()
-    # ibcontract.secType = "FUT"
-    # ibcontract.expiry = "202009"
-    # ibcontract.symbol = "GE"
-    # ibcontract.exchange = "GLOBEX"
+    ibcontract.secType = "FUT"
+    ibcontract.expiry = "202009"
+    ibcontract.symbol = "GE"
+    ibcontract.exchange = "GLOBEX"
 
-    ibcontract.secType = "STK"
-    ibcontract.exchange = "SMART"
-    ibcontract.symbol = "MMM"
-    ibcontract.currency = "USD"
+    # ibcontract.secType = "STK"
+    # ibcontract.exchange = "SMART"
+    # ibcontract.symbol = "MMM"
+    # ibcontract.currency = "USD"
 
     end_dt = datetime.datetime(2016, 8, 3)
     ans = client.get_IB_historical_data(ibcontract,
@@ -32,5 +32,4 @@ def main():
 
 if __name__ == "__main__":
     data = main()
-    import pdb; pdb.set_trace()  # BREAKPOINT
     print(data)
