@@ -1,10 +1,9 @@
 from swigibpy import EWrapper
-import time
-import numpy as np
-import datetime
 from swigibpy import EPosixClientSocket
+from threading import Event
 
 MEANINGLESS_ID = 999
+CLIENT_ID = 9999
 
 tick_type_map = {
     0: 'bid_size',
@@ -21,18 +20,19 @@ tick_type_map = {
     21: 'avg_volume',
     22: 'open_interest',
     27: 'option_call_open_interest',
+    45: 'last_timestamp',
 }
+
 
 def return_IB_connection_info():
     """
     Returns the tuple host, port, clientID required by eConnect
-
     """
 
     host = ""
 
     port = 4001
-    clientid = 999
+    clientid = CLIENT_ID
 
     return (host, port, clientid)
 
@@ -44,6 +44,9 @@ class IBWrapper(EWrapper):
     the TWS or Gateway.
 
     """
+    def __init__(self):
+        super(IBWrapper, self).__init__()
+        self.got_sample = Event()
 
     # We need these but don't use them
     def nextValidId(self, orderId):
@@ -84,23 +87,31 @@ class IBWrapper(EWrapper):
         # Wrapper functions don't have to return anything
 
     def init_tickdata(self, tickerid):
+        '''
+        tickdata is a dict of {tickerid: [, , , ,]}
+        '''
+        self.fullsample = False
         print('init')
         if "data_tickdata" not in self.__dict__:
             tickdict = dict()
         else:
             tickdict = self.data_tickdata
 
-        tickdict[tickerid] = [np.nan] * 4
+        tickdict[tickerid] = [False] * 4
         setattr(self, "data_tickdata", tickdict)
 
+    def check_full(self, tickerid):
+        data = self.data_tickdata[tickerid]
+        if all(data):
+            self.got_sample.set()
+
     def tickString(self, tickerid, field, value):
-        print('tickString')
-        print(field)
-        print(value)
+        unmapped_field = int(field)
+        print('tickString: {}: {}'.format(tick_type_map[unmapped_field],
+                                          value))
         marketdata = self.data_tickdata[tickerid]
 
         # update string ticks
-
         tick_type = field
         # 45 is last timestamp
         if int(tick_type) == 0:
@@ -116,6 +127,8 @@ class IBWrapper(EWrapper):
         elif int(tick_type) == 2:
             # ask
             marketdata[0][3] = float(value)
+
+        self.check_full(tickerid)
 
     def tickGeneric(self, tickerid, tick_type, value):
         print('tickGeneric')
@@ -136,8 +149,9 @@ class IBWrapper(EWrapper):
             # ask
             marketdata[3] = float(value)
 
+        self.check_full(tickerid)
+
     def tickSize(self, tickerid, tick_type, size):
-        print('tickSize')
         print('tickSize: tick_type: {}, size: {}'.
               format(tick_type_map[tick_type], size))
 
@@ -150,10 +164,10 @@ class IBWrapper(EWrapper):
         elif int(tick_type) == 3:
             # ask
             marketdata[1] = int(size)
+        self.check_full(tickerid)
 
     def tickPrice(self, tickerid, tick_type, price, canautoexecute):
         # update ticks of the form new price
-
         print('tickPrice: tick_type: {}, price: {}'.
               format(tick_type_map[tick_type], price))
         marketdata = self.data_tickdata[tickerid]
@@ -164,6 +178,7 @@ class IBWrapper(EWrapper):
         elif int(tick_type) == 2:
             # ask
             marketdata[3] = float(price)
+        self.check_full(tickerid)
 
     def updateMktDepth(self, id, position, operation, side, price, size):
         """
@@ -196,7 +211,6 @@ class IBclient(object):
     client=IBclient(callback)
 
     We then use various methods to get prices etc
-
     """
 
     def __init__(self, callback):
@@ -213,8 +227,7 @@ class IBclient(object):
         self.tws = tws
         self.cb = callback
 
-    def get_IB_market_data(self, ibcontract, seconds=200,
-                           tickerid=MEANINGLESS_ID):
+    def get_IB_market_data(self, ibcontract, tickerid=MEANINGLESS_ID):
         """
         Returns granular market data
 
@@ -233,31 +246,7 @@ class IBclient(object):
             False,
             None)
 
-        start_time = time.time()
-
-        finished = False
-        iserror = False
-
-
-        # this reams the cpu
-        # while not finished and not iserror:
-        #     iserror = self.cb.flag_iserror
-        #     if (time.time() - start_time) > seconds:
-        #         finished = True
-        #     pass
-
-        # self.tws.cancelMktData(tickerid)
-
         marketdata = self.cb.data_tickdata[tickerid]
-        print(marketdata)
-        # # marketdata should now contain some interesting information
-        # # Note in this implementation we overwrite the contents with each tick;
-        # # we could keep them
-
-        # if iserror:
-        #     print("Error: " + self.cb.error_msg)
-        #     print("Failed to get any prices with marketdata")
-
         return marketdata
 
     def cancelMktData(self, tickerid=MEANINGLESS_ID):

@@ -13,13 +13,22 @@ if __name__ == "__main__":
 
     ibcontract = IBcontract()
     ibcontract.secType = "FUT"
-    ibcontract.expiry = "201612"
+    ibcontract.expiry = "201712"
     ibcontract.symbol = "GE"
     ibcontract.exchange = "GLOBEX"
 
     ans = client.get_IB_market_data(ibcontract)
-    time.sleep(140)
-    client.cancelMktData()
 
+    WAIT_TIME = 5
+    try:
+        client.cb.got_sample.wait(timeout=WAIT_TIME)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        if not callback.got_sample.is_set():
+            print('Failed to get contract within %d seconds' % WAIT_TIME)
+
+        print("\nDisconnecting...")
+        client.cancelMktData()
     print("Bid size, Ask size; Bid price; Ask price")
     print(ans)
