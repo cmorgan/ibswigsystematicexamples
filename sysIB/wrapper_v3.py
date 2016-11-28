@@ -251,3 +251,6 @@ class IBclient(object):
 
     def cancelMktData(self, tickerid=MEANINGLESS_ID):
         self.tws.cancelMktData(tickerid)
+        self.tws.eDisconnect()
+
+        #self.tws.cancelMktData(tickerid)
