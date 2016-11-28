@@ -1,5 +1,6 @@
 from sysIB.wrapper_v3 import IBWrapper, IBclient
 from swigibpy import Contract as IBcontract
+import time
 
 if __name__ == "__main__":
 
@@ -17,5 +18,8 @@ if __name__ == "__main__":
     ibcontract.exchange = "GLOBEX"
 
     ans = client.get_IB_market_data(ibcontract)
+    time.sleep(140)
+    client.cancelMktData()
+
     print("Bid size, Ask size; Bid price; Ask price")
     print(ans)

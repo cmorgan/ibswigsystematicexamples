@@ -7,7 +7,8 @@ from swigibpy import EPosixClientSocket
 from sysIB.IButils import autodf
 
 
-MEANINGLESS_NUMBER = 999
+MEANINGLESS_NUMBER = 9999
+CLIENT_ID = 99999
 
 # collect all available data from IB
 EMPTY_HDATA = autodf('date', 'open', 'high', 'low', 'close', 'volume',
@@ -27,7 +28,7 @@ def return_IB_connection_info():
     """
     host = ""
     port = PORT
-    clientid = 999
+    clientid = CLIENT_ID
 
     return (host, port, clientid)
 
@@ -116,7 +117,6 @@ class IBclient(object):
         tws = EPosixClientSocket(callback)
         host, port, clientid = return_IB_connection_info()
         tws.eConnect(host, port, clientid)
-
         self.tws = tws
         self.cb = callback
 
@@ -171,4 +171,5 @@ class IBclient(object):
 
         historicdata = self.cb.data_historicdata[tickerid]
         results = historicdata.to_pandas("date")
+        self.tws.eDisconnect()
         return results
